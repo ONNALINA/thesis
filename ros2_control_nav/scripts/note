@@ -1,0 +1,210 @@
+imu
+-https://github.com/IntelRealSense/realsense-ros/issues/2563
+
+path planning -a*
+-https://www.simplilearn.com/tutorials/artificial-intelligence-tutorial/a-star-algorithm
+
+-https://www.youtube.com/watch?v=Mb1srg1ON60
+
+-https://www.hmc.edu/lair/ARW/ARW-Lecture01-Odometry.pdf
+
+lidar
+-https://gitlab.msu.edu/av/av_notes/-/blob/master/ROS/python/centroid.py
+
+
+----sub_main.py----
+
+#!/usr/bin/python3
+import rclpy
+from rclpy.node import Node
+
+from std_msgs.msg import Bool,String,Int16
+
+import time
+import numpy
+
+# from basic_movement import *
+
+class Sub_Main(Node):
+    def __init__(self):
+        super().__init__('sub_main_node')
+        self.order_select = input(int())
+        self.sub_enable = self.create_subscription(Bool,'/order_enable',self.order_callback,10)
+        Bool.data = False
+        self.sub_enable
+        self.pub_list = self.create_publisher(String,'/station',10)
+        timer_cb_group = None
+        self.move_ = self.create_timer(0.1,self.move_wheel,callback_group=timer_cb_group)
+
+        self.sub_order = self.create_subscription(Int16,'/order_id',self.order_id_callback,10)
+        self.sub_order
+        self.pub_order = self.create_publisher(Bool,'/at_order',10)
+        
+        Lx = 0.198 # m
+        Ly = 0.2043
+        self.eqm = numpy.array([[1, -1, -(Lx+Ly)],[1,  1, (Lx+Ly)], [1,  1, -(Lx+Ly)], [1, -1, (Lx+Ly)]])
+        self.r = 0.127/2
+        self.Vx = float()
+        self.Vy = float()
+        self.Wz = float()
+        self.A0 = float()
+        self.A1 = float()
+        self.A2 = float()
+        self.A3 = float()     
+        self.a = int()
+        self.robot_vel = 0
+        self.base_vel = [0,0,0,0]
+        self.order_list = 15
+
+    def order_callback(self,msg:Bool):
+        msg.data = True
+        print('forward_start')
+        self.Vx = -3
+        self.Vy = 0
+        self.Wz = 0
+        self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+        self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
+        # basic_movement.forward(self)
+        # # print(self.base_vel)
+        # packetHandler.write2ByteTxRx(portHandler, DXL2_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[1]))  ,packetHandler.write2ByteTxRx(portHandler, DXL4_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[3]))
+        # packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_GOAL_ACCELERATION, 5)
+
+        # packetHandler.write2ByteTxRx(portHandler, DXL3_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[2]))  ,packetHandler.write2ByteTxRx(portHandler, DXL1_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[0]))
+        # packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_GOAL_ACCELERATION, 5) 
+
+        time.sleep(7)
+        print('stop')
+        self.Vx = 0
+        self.Vy = 0
+        self.Wz = 0
+        self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+        # basic_movement.stop(self)
+        self.robot_vel = self.Vx,self.Vy,self.Wz
+        self.base_vel = [self.A0,self.A1,self.A2,self.A3]
+        # packetHandler.write2ByteTxRx(portHandler, DXL2_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[1]))  ,packetHandler.write2ByteTxRx(portHandler, DXL4_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[3]))
+        # packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_GOAL_ACCELERATION, 5)
+
+        # packetHandler.write2ByteTxRx(portHandler, DXL3_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[2]))  ,packetHandler.write2ByteTxRx(portHandler, DXL1_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[0]))
+        # packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL1_ID, ADDR_GOAL_ACCELERATION, 5)
+        
+        print('true')
+
+        # self.a = 1
+        
+        # if self.a == 1:
+        #     print('forward')
+        #     self.Vx = -3
+        #     self.Vy = 0
+        #     self.Wz = 0
+        #     self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+        #     self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
+        #     # basic_movement.forward(self)
+        #     # print(self.base_vel)
+        #     # packetHandler.write2ByteTxRx(portHandler, DXL2_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[1]))  ,packetHandler.write2ByteTxRx(portHandler, DXL4_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[3]))
+        #     # packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_GOAL_ACCELERATION, 5)
+
+        #     # packetHandler.write2ByteTxRx(portHandler, DXL3_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[2]))  ,packetHandler.write2ByteTxRx(portHandler, DXL1_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[0]))
+        #     # packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL1_ID, ADDR_GOAL_ACCELERATION, 5)
+        
+        #     time.sleep(5)
+        #     print('stop')
+        #     self.Vx = 0
+        #     self.Vy = 0
+        #     self.Wz = 0
+        #     self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+        #     # basic_movement.stop(self)
+        #     self.robot_vel = self.Vx,self.Vy,self.Wz
+        #     self.base_vel = [self.A0,self.A1,self.A2,self.A3]
+        #     # packetHandler.write2ByteTxRx(portHandler, DXL2_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[1]))  ,packetHandler.write2ByteTxRx(portHandler, DXL4_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[3]))
+        #     # packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_GOAL_ACCELERATION, 5)
+
+        #     # packetHandler.write2ByteTxRx(portHandler, DXL3_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[2]))  ,packetHandler.write2ByteTxRx(portHandler, DXL1_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[0]))
+        #     # packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL1_ID, ADDR_GOAL_ACCELERATION, 5)
+        
+        # time.sleep(5)
+        # self.a = 2
+
+        # if self.a == 2:
+        #     msgstr = String()
+        #     msgstr.data = 'Store'
+        #     self.pub_list.publish(msgstr)
+
+        # self.a = 3
+
+        # if self.a == 3:
+        #     print('backward')
+        #     self.Vx = 3
+        #     self.Vy = 0
+        #     self.Wz = 0
+        #     self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+        #     self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
+        #     # basic_movement.backward(self)
+        #     # packetHandler.write2ByteTxRx(portHandler, DXL2_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[1]))  ,packetHandler.write2ByteTxRx(portHandler, DXL4_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[3]))
+        #     # packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_GOAL_ACCELERATION, 5)
+
+        #     # packetHandler.write2ByteTxRx(portHandler, DXL3_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[2]))  ,packetHandler.write2ByteTxRx(portHandler, DXL1_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[0]))
+        #     # packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL1_ID, ADDR_GOAL_ACCELERATION, 5)
+        
+        # time.sleep(5)
+        # print('stop')
+        
+        # self.Vx = 0
+        # self.Vy = 0
+        # self.Wz = 0
+        # self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+        # # basic_movement.stop(self)
+        # self.robot_vel = self.Vx,self.Vy,self.Wz
+        # self.base_vel = [self.A0,self.A1,self.A2,self.A3]
+        # # packetHandler.write2ByteTxRx(portHandler, DXL2_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[1]))  ,packetHandler.write2ByteTxRx(portHandler, DXL4_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[3]))
+        # # packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_GOAL_ACCELERATION, 5)
+
+        # # packetHandler.write2ByteTxRx(portHandler, DXL3_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[2]))  ,packetHandler.write2ByteTxRx(portHandler, DXL1_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[0]))
+        # # packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL1_ID, ADDR_GOAL_ACCELERATION, 5)
+        # rclpy.shutdown()
+
+    def move_wheel(self):
+        print('move')
+        print(self.base_vel)
+        # packetHandler.write2ByteTxRx(portHandler, DXL2_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[1]))  ,packetHandler.write2ByteTxRx(portHandler, DXL4_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[3]))
+        # packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_GOAL_ACCELERATION, 5)
+
+        # packetHandler.write2ByteTxRx(portHandler, DXL3_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[2]))  ,packetHandler.write2ByteTxRx(portHandler, DXL1_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[0]))
+        # packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_GOAL_ACCELERATION, 5)               ,packetHandler.write1ByteTxRx(portHandler, DXL1_ID, ADDR_GOAL_ACCELERATION, 5)
+        
+        self.base_vel = [(self.base_vel[0]),(self.base_vel[1]),(self.base_vel[2]),(self.base_vel[3])]
+    
+    def order_id_callback(self,msg):
+        print(msg)
+        pos0 = msg.data
+        pos = pos0 % 3
+
+        if pos == 1:
+            print('left')
+            # basic_movement.left(self)
+            msgbool = Bool()
+            msgbool.data = True
+            self.pub_order.publish(msgbool)
+
+
+        elif pos == 2:
+            print('center')
+            msgbool = Bool()
+            msgbool.data = True
+            self.pub_order.publish(msgbool)
+
+        elif pos == 3:
+            print('right')
+            # basic_movement.right(self)
+            msgbool = Bool()
+            msgbool.data = True
+            self.pub_order.publish(msgbool)
+
+def main(args=None):
+    rclpy.init(args=args)
+    controller = Sub_Main()
+    rclpy.spin(controller)
+    controller.destroy_node()
+    rclpy.shutdown()
+
+if __name__=='__main__':
+    main()
