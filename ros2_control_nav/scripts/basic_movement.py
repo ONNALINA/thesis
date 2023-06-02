@@ -49,9 +49,9 @@ class basic_movement(Node):
                     termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
                 return ch
             
-        DXL_MINIMUM_POSITION_VALUE  = 100           # Dynamixel will rotate between this value
-        DXL_MAXIMUM_POSITION_VALUE  = 4000 
-        dxl_goal_position = [DXL_MINIMUM_POSITION_VALUE, DXL_MAXIMUM_POSITION_VALUE] 
+        # DXL_MINIMUM_POSITION_VALUE  = 100           # Dynamixel will rotate between this value
+        # DXL_MAXIMUM_POSITION_VALUE  = 4000 
+        # dxl_goal_position = [DXL_MINIMUM_POSITION_VALUE, DXL_MAXIMUM_POSITION_VALUE] 
 
         DXL_MINIMUM_SPEED_VALUE = 0       # Goal position
         DXL_MAXIMUM_SPEED_VALUE = 1023
@@ -89,20 +89,52 @@ class basic_movement(Node):
         self.A3 = abs(int(self.base_vel[3]))
         self.base_vel = (self.A0,self.A1,self.A2,self.A3)
 
-    def rotate_1(self):
-        print('rotate_1')
+    def rotate_right(self): #All CCW
+        print('rotate_right')
         self.A0 = abs(int(self.base_vel[0]))
         self.A1 = abs(int(self.base_vel[1]))
         self.A2 = abs(int(self.base_vel[2]))
         self.A3 = abs(int(self.base_vel[3]))
         self.base_vel = (self.A0,self.A1,self.A2,self.A3)
 
-    def rotate_2(self):
-        print('rotate_2')
+    def rotate_left(self):
+        print('rotate_left')
         self.A0 = abs(int(self.base_vel[0])+1024)
         self.A1 = abs(int(self.base_vel[1])-1024)
         self.A2 = abs(int(self.base_vel[2])+1024)
         self.A3 = abs(int(self.base_vel[3])-1024)
+        self.base_vel = (self.A0,self.A1,self.A2,self.A3)
+        
+    def RF(self):
+        print('RF')
+        self.A0 = abs(int(self.base_vel[0]))
+        self.A1 = 0
+        self.A2 = 0
+        self.A3 = abs(int(self.base_vel[3])-1024)
+        self.base_vel = (self.A0,self.A1,self.A2,self.A3)
+
+    def RB(self):
+        print('RB')
+        self.A0 = 0
+        self.A1 = abs(int(self.base_vel[1]))
+        self.A2 = abs(int(self.base_vel[2]))
+        self.A3 = 0
+        self.base_vel = (self.A0,self.A1,self.A2,self.A3)
+
+    def LF(self):
+        print('LF')
+        self.A0 = 0
+        self.A1 = abs(int(self.base_vel[1]))
+        self.A2 = abs(int(self.base_vel[2])-1024)
+        self.A3 = 0
+        self.base_vel = (self.A0,self.A1,self.A2,self.A3)
+
+    def LB(self):
+        print('LB')
+        self.A0 = self.A0 = abs(int(self.base_vel[0]))
+        self.A1 = 0
+        self.A2 = 0
+        self.A3 = abs(int(self.base_vel[0])+1024)
         self.base_vel = (self.A0,self.A1,self.A2,self.A3)
 
     def stop(self):
@@ -112,4 +144,3 @@ class basic_movement(Node):
         self.A2 = 0
         self.A3 = 0
         self.base_vel = (self.A0,self.A1,self.A2,self.A3)
-        print('stop')

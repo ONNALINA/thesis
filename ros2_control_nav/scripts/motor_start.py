@@ -58,7 +58,7 @@ DXL3_ID                        = 3                 # Dynamixel#3 ID : 3
 DXL4_ID                        = 4                 # Dynamixel#4 ID : 4
 BAUDRATE                       = 57600             # Dynamixel default baudrate : 57600
 
-DEVICENAME = '/dev/ttyUSB0'                        # Port connected to controller
+DEVICENAME = '/dev/ttyUSB1'                        # Port connected to controller
 
 TORQUE_ENABLE                  = 1                 # Value for enabling the torque
 TORQUE_DISABLE                 = 0                 # Value for disabling the torque

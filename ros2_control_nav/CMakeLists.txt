@@ -17,7 +17,6 @@ find_package(ament_cmake REQUIRED)		# cpp (optional)
 find_package(rclcpp REQUIRED)			# cpp (optional)
 find_package(ament_cmake_python REQUIRED)   	# python (optional)
 find_package(rclpy REQUIRED)                	# python (optional)
-find_package(imu_tools REQUIRED)
 
 ######################################################
 
@@ -38,6 +37,8 @@ install(PROGRAMS
   scripts/sub_nav2.py
   scripts/gui_node.py
   scripts/test_sub_pub.py
+  scripts/joy.py
+
 
 
   scripts/a_sdk_group_bulk_read.py

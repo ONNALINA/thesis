@@ -27,7 +27,7 @@ from std_msgs.msg import String,Bool,Int16
 import numpy
 import time
 from basic_movement import *
-# from motor_start import *
+from motor_start import *
 
 class Move_Step_Node(Node):
     def __init__(self):
@@ -49,8 +49,8 @@ class Move_Step_Node(Node):
 
         self.sub_enble = self.create_subscription(Bool,'/order_enable',self.enable_callback,10)
         self.sub_order_id = self.create_subscription(String,'/move_step',self.order_id_callback,10)
-        self.sub_order_done = self.create_subscription(String,'/order_done',self.order_done_callback,10)
-
+        self.sub_station_home = self.create_subscription(String,'/station',self.order_done_callback,10)
+        
         self.pub_station = self.create_publisher(String,'/station',10)
         self.pub_at_order_ = self.create_publisher(Bool,'/at_order',10)
         self.time_for_pick = self.create_publisher(String,'/time_for_pick',10)
@@ -67,7 +67,7 @@ class Move_Step_Node(Node):
             self.now()
         if int(msg.data) < 0:
             right_time = (abs(int(msg.data))+(abs(int(msg.data)))/10)+0.1
-            self.right(msg.data)
+            self.right()
             time.sleep(right_time)
             self.stop_()
             time.sleep(1)
@@ -76,7 +76,7 @@ class Move_Step_Node(Node):
 
         if int(msg.data) > 0:
             left_time = (abs(int(msg.data))+(abs(int(msg.data)))/10)+0.1
-            self.left(msg.data)
+            self.left()
             time.sleep(left_time)
             self.stop_()
             time.sleep(1)
@@ -84,25 +84,47 @@ class Move_Step_Node(Node):
             self.now()
 
     def order_done_callback(self,msg:String):
-        if msg.data == 'order done!':
+        if msg.data == 'Home':
             self.move_to_home()
 
     def move_to_home(self):
         print('move_to_home')
-        self.forward_()
         time.sleep(1)
+        self.right()
+        time.sleep(2)
         self.stop_()
         time.sleep(1)
         self.torque_disable()
 
-        self.left_rotate()
         time.sleep(1)
+        self.forward_()
+        time.sleep(10.5)
         self.stop_()
         time.sleep(1)
         self.torque_disable()
 
-        self.forward_()
-        time.sleep(3)
+        # self.right_rotate()
+        # time.sleep(7.5)
+        # self.stop_()
+        # time.sleep(2)
+        # self.torque_disable()
+
+        # time.sleep(1)
+        # self.forward_()
+        # time.sleep(1)
+        # self.stop_()
+        # time.sleep(1)
+        # self.torque_disable()
+
+        # time.sleep(1)
+        # self.left()
+        # time.sleep(10)
+        # self.stop_()
+        # time.sleep(1)
+        # self.torque_disable()
+
+        self.right_rotate()
+        time.sleep(22.15)
         self.stop_()
         time.sleep(1)
         self.torque_disable()
@@ -114,7 +136,7 @@ class Move_Step_Node(Node):
     def move_to_store(self):
         print('move_to_store')
         self.forward_()
-        time.sleep(4)
+        time.sleep(6)
         self.stop_()
         time.sleep(1)
         self.torque_disable()
@@ -128,45 +150,62 @@ class Move_Step_Node(Node):
         self.backward()
         time.sleep(3)
         self.stop_()
-        time.sleep(1)
+        time.sleep(2)
         self.torque_disable()
+        time.sleep(1)
 
-        self.left_rotate()
-        time.sleep(1)
+        self.left()
+        time.sleep(11)
         self.stop_()
-        time.sleep(1)
+        time.sleep(2)
         self.torque_disable()
+        time.sleep(1)
 
-        self.forward_()
-        time.sleep(3)
+        self.right_rotate()
+        time.sleep(7.4)
         self.stop_()
-        time.sleep(1)
+        time.sleep(2)
         self.torque_disable()
+        time.sleep(1)
 
-        self.left_rotate()
-        time.sleep(1)
-        self.stop_()
-        time.sleep(1)
-        self.torque_disable()
+        # self.left()
+        # time.sleep(1)
+        # self.stop_()
+        # time.sleep(2)
+        # self.torque_disable()
+        # time.sleep(1)
+
+        # self.forward_()
+        # time.sleep(10)
+        # self.stop_()
+        # time.sleep(2)
+        # self.torque_disable()
+        # time.sleep(1)
+
+        # self.right_rotate()
+        # time.sleep(14.85)
+        # self.stop_()
+        # time.sleep(2)
+        # self.torque_disable()
+        # time.sleep(1)
 
         msg = String()
-        msg.data = 'your time !'
-        self.time_for_pick.publish(msg)
-        self.pub_station
+        msg.data = 'PL'
+        self.pub_station.publish(msg)
 
     def left_rotate(self):
         self.Vx = 0#-17.9541
         self.Vy = 0
-        self.Wz = 18
+        self.Wz = -18
         self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
         self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
         basic_movement.rotate_2(self)
         self.move_wheel()
 
-    def right_rotate(self):
+    def right_rotate(self): #All CCW
         self.Vx = 0#-17.9541
         self.Vy = 0
-        self.Wz = -18
+        self.Wz = 18
         self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
         self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
         basic_movement.rotate_1(self)
@@ -248,18 +287,18 @@ class Move_Step_Node(Node):
 
     def torque_disable(self):
         print('torque_disable')
-        # packetHandler.write1ByteTxRx(portHandler, DXL1_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_DISABLE)
-        # packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_DISABLE)
-        # packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_DISABLE)
-        # packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_DISABLE)
+        packetHandler.write1ByteTxRx(portHandler, DXL1_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_DISABLE)
+        packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_DISABLE)
+        packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_DISABLE)
+        packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_MX_TORQUE_ENABLE, TORQUE_DISABLE)
 
     def move_wheel(self):
         print('move_wheel',self.base_vel)
-        # packetHandler.write2ByteTxRx(portHandler, DXL2_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[1]))  ,packetHandler.write2ByteTxRx(portHandler, DXL4_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[3]))
-        # packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_GOAL_ACCELERATION, 10)               ,packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_GOAL_ACCELERATION, 10)
+        packetHandler.write2ByteTxRx(portHandler, DXL2_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[1]))  ,packetHandler.write2ByteTxRx(portHandler, DXL4_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[3]))
+        packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_GOAL_ACCELERATION, 10)               ,packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_GOAL_ACCELERATION, 10)
 
-        # packetHandler.write2ByteTxRx(portHandler, DXL3_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[2]))  ,packetHandler.write2ByteTxRx(portHandler, DXL1_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[0]))
-        # packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_GOAL_ACCELERATION, 10)               ,packetHandler.write1ByteTxRx(portHandler, DXL1_ID, ADDR_GOAL_ACCELERATION, 10)
+        packetHandler.write2ByteTxRx(portHandler, DXL3_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[2]))  ,packetHandler.write2ByteTxRx(portHandler, DXL1_ID, ADDR_MX_MOVING_SPEED, (self.base_vel[0]))
+        packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_GOAL_ACCELERATION, 10)               ,packetHandler.write1ByteTxRx(portHandler, DXL1_ID, ADDR_GOAL_ACCELERATION, 10)
         self.base_vel = [(self.base_vel[0]),(self.base_vel[1]),(self.base_vel[2]),(self.base_vel[3])]
 
 def main(args=None):

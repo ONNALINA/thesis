@@ -40,8 +40,8 @@ class Joy_Node(Node):
 
         self.base_vel = [0,0,0,0]
         if msg.buttons[5] != 1:
-            if msg.axes[1]  > 0.1 : #front
-                self.Vx = -65
+            if msg.axes[1]  > 0.05 and msg.axes[0] == 0.0: # front
+                self.Vx = -18
                 self.Vy = 0
                 self.Wz = 0
                 self.movevel = self.FB
@@ -49,41 +49,89 @@ class Joy_Node(Node):
                 self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
                 basic_movement.forward(self)
 
-            if msg.axes[1] < -0.1 : #back
-                self.Vx = 65
-                self.Vy = 0
-                self.Wz = 0
+            elif msg.axes[1] < -0.05 and msg.axes[0] == 0.0: # back
+                 self.Vx = 18
+                 self.Vy = 0
+                 self.Wz = 0
+                 self.movevel = self.FB
+                 self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+                 self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
+                 basic_movement.backward(self)
 
-                self.movevel = self.FB
-                self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
-                self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
-                basic_movement.backward(self)
+            # elif msg.axes[0] > 0.05 and msg.buttons[11] == 0: # left
+            #      self.Vx = 0
+            #      self.Vy = -18
+            #      self.Wz = 0
+            #      self.movevel = self.LR
+            #      self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+            #      self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
+            #      basic_movement.left(self)
 
-            elif msg.axes[0] > 0.1 : #left
-                self.Vx = 0
-                self.Vy = -65
-                self.Wz = 0
-                self.movevel = self.LR
-                self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
-                self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
-                basic_movement.left(self)
-
-            elif msg.axes[0] < -0.1 : #right
-                self.Vx = 0
-                self.Vy = 65
-                self.Wz = 0
-                self.movevel = self.LR
-                self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
-                self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
-                basic_movement.right(self)
+            # elif msg.axes[0] < -0.05 and msg.buttons[11] == 0: # right
+            #      self.Vx = 0
+            #      self.Vy = 18
+            #      self.Wz = 0
+            #      self.movevel = self.LR
+            #      self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+            #      self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
+            #      basic_movement.right(self)
                 
-            if msg.axes[0] == 0.0 and msg.axes[1] == 0.0:
+            elif msg.axes[0] == 0.0 and msg.axes[1] == 0.0:
+                 self.Vx = 0
+                 self.Vy = 0
+                 self.Wz = 0
+                 self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+                 self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
+                 basic_movement.stop(self)
+
+            elif msg.buttons[11] == 1 and msg.axes[0] > 0.05 : # around left
                 self.Vx = 0
                 self.Vy = 0
-                self.Wz = 0
+                self.Wz = -18
                 self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
                 self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
-                basic_movement.stop(self)
+                basic_movement.rotate_left(self)
+            
+            elif msg.buttons[11] == 1 and msg.axes[0] < -0.05 : # around right
+                self.Vx = 0
+                self.Vy = 0
+                self.Wz = 18
+                self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+                self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
+                basic_movement.rotate_right(self)
+
+          #   # EDIT AXES AND BUTTONS
+          #   elif msg.axes[0] < -0.1 and msg.axes[1] > 0.1:
+          #        self.Vx = -65
+          #        self.Vy = 65
+          #        self.Wz = 0
+          #        self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+          #        self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
+          #        basic_movement.RF(self)
+
+          #   elif msg.axes[0] < -0.1 and msg.axes[1] < -0.1:
+          #        self.Vx = 65
+          #        self.Vy = 65
+          #        self.Wz = 0
+          #        self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+          #        self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
+          #        basic_movement.RB(self)
+
+          #   elif msg.axes[0] > 0.1 and msg.axes[1] > 0.1:
+          #        self.Vx = -65
+          #        self.Vy = -65
+          #        self.Wz = 0
+          #        self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+          #        self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
+          #        basic_movement.LF(self)
+
+          #   elif msg.axes[0] > 0.1 and msg.axes[1] < -0.1:
+          #        self.Vx = 65
+          #        self.Vy = -65
+          #        self.Wz = 0
+          #        self.robot_vel = numpy.array([[self.Vx], [self.Vy], [self.Wz]])
+          #        self.base_vel = ((1/self.r)*self.eqm).dot((self.robot_vel))
+          #        basic_movement.LB(self)
 
     def move_wheel(self):
         a = round((self.base_vel[1])*self.movevel)
@@ -91,14 +139,12 @@ class Joy_Node(Node):
         c = round((self.base_vel[3])*self.movevel)
         d = round((self.base_vel[0])*self.movevel)
         self.base_vel = [self.base_vel[0],self.base_vel[1],self.base_vel[2],self.base_vel[3]]
-
-        packetHandler.write2ByteTxRx(portHandler, DXL2_ID, ADDR_MX_MOVING_SPEED, a)   ,packetHandler.write2ByteTxRx(portHandler, DXL4_ID, ADDR_MX_MOVING_SPEED, c)
-        packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_GOAL_ACCELERATION, 5) ,packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_GOAL_ACCELERATION, 5)
-        packetHandler.write2ByteTxRx(portHandler, DXL3_ID, ADDR_MX_MOVING_SPEED, b)   ,packetHandler.write2ByteTxRx(portHandler, DXL1_ID, ADDR_MX_MOVING_SPEED, d)
-        packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_GOAL_ACCELERATION, 5) ,packetHandler.write1ByteTxRx(portHandler, DXL1_ID, ADDR_GOAL_ACCELERATION, 5)
-        
-        self.base_vel = [self.base_vel[0],self.base_vel[1],self.base_vel[2],self.base_vel[3]]
         print(self.base_vel)
+        time.sleep(0.1)
+        packetHandler.write2ByteTxRx(portHandler, DXL2_ID, ADDR_MX_MOVING_SPEED, a)   ,packetHandler.write2ByteTxRx(portHandler, DXL4_ID, ADDR_MX_MOVING_SPEED, c)
+        packetHandler.write1ByteTxRx(portHandler, DXL2_ID, ADDR_GOAL_ACCELERATION, 10) ,packetHandler.write1ByteTxRx(portHandler, DXL4_ID, ADDR_GOAL_ACCELERATION, 10)
+        packetHandler.write2ByteTxRx(portHandler, DXL3_ID, ADDR_MX_MOVING_SPEED, b)   ,packetHandler.write2ByteTxRx(portHandler, DXL1_ID, ADDR_MX_MOVING_SPEED, d)
+        packetHandler.write1ByteTxRx(portHandler, DXL3_ID, ADDR_GOAL_ACCELERATION, 10) ,packetHandler.write1ByteTxRx(portHandler, DXL1_ID, ADDR_GOAL_ACCELERATION, 10)
 
 def main(args=None):
     rclpy.init(args=args)
